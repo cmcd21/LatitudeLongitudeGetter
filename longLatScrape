@@ -1,0 +1,72 @@
+import os, time, openpyxl, csv
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+
+#import excel file
+print('opening workbook...')
+os.chdir('C:\\Users\\chris\\Documents')
+wb = openpyxl.load_workbook('Resume Data.xlsx')
+sheet = wb['Missing']
+
+d = {} #dictionary to contain city and corresponding country
+
+#grab city and country from excel and add to dictionary
+for row in range(2,sheet.max_row):
+    country = sheet['B' + str(row)].value
+    city = sheet['C' + str(row)].value
+
+    d[city] = country
+
+#open Chrome to website
+print('opening browser...')
+
+browser = webdriver.Chrome() 
+browser.get('https://www.latlong.net/')
+
+lat_long_list = []
+#enter text and click find button/ENTER
+for key, value in d.items():
+
+    searchBar = browser.find_element_by_class_name('width70')
+    searchBar.send_keys(key, ', ' ,value)
+    searchBar.send_keys(Keys.ENTER)
+    time.sleep(5)
+   
+    #if location doesnt exist, move on without crashing
+    try:
+        latlng = browser.find_element_by_id('latlngspan')
+    except:
+        alert = browser.switch_to.alert
+        alert.accept()
+        browser.switch_to.default_content
+        print('Could not find data for ' + str(key))
+        searchBar.clear()
+        continue
+
+    #grab latitude and longitude text and add to list
+    latlng = latlng.text.strip('() ').split(',')
+    print('The latitude and longitude of ' + str(key) + ' is: ' + str(latlng))
+    lat_long_list.append(latlng)
+    searchBar.clear()
+
+#write to csv file
+csv_data = []
+for row in range(2,sheet.max_row):
+    country = sheet['B' + str(row)].value
+    city = sheet['C' + str(row)].value
+    i = row - 2
+    csv_data.append({'city':city, 
+                     'country':country, 
+                     'lat':lat_long_list[i][0], 
+                     'long':lat_long_list[i][1]
+                    })
+
+fieldnames = ['city', 'country', 'lat', 'long']
+header = {'city':'City', 'country':'Country', 'lat':'Latitude', 'long':'Longitude'}
+
+with open('locationDataScrape.csv', 'w', newline='') as csv_file:
+    writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+    writer.writerow(header)
+    writer.writerows(csv_data)
+
+print('Done')
