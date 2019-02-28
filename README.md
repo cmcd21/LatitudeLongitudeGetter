@@ -1,10 +1,7 @@
 # Latitude & Longitude Getter
-Get longitude and latitude of a city/town from .xlsx workbook.
+When making my [interactive tableau cv](https://public.tableau.com/profile/christopher.mcdowell#!/vizhome/InteractiveCV_4/CV), many of the  locations were not being found, and therefore I had to manually enter the longitude and latitude of these unknown areas. I had over 50 unknown locations so wanted to automate the process of getting their co-ordinates.
 
-Maps in Tableau often only locate the main areas (major citeis). Latitude and longitude can be entered for any unknown locations.
-I had over 50 unknown locations so wanted to automate the process of getting their co-ordinates.
-
-There are 2 programs in this folder:
+There are 2 programs in this folder that get the longitude and latitude of a city/town from .xlsx workbook:
 
 ## latLongAPI
 
